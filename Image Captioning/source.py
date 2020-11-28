@@ -16,7 +16,7 @@
 # - Model Architecture
 # - Inference
 
-# In[166]:
+# In[1]:
 
 
 # import all the required libraries
@@ -42,7 +42,7 @@ from keras.layers import Input, Dense, Dropout, Embedding, LSTM
 from keras.layers.merge import add
 
 
-# In[167]:
+# In[2]:
 
 
 # Read Text Captions
@@ -54,20 +54,20 @@ def readTextFile(path):
     
 
 
-# In[23]:
+# In[3]:
 
 
 captions  = readTextFile("./Data/Flickr_TextData/Flickr8k.token.txt")
 captions = captions.split('\n')[:-1]
 
 
-# In[24]:
+# In[4]:
 
 
 print(len(captions))            # No of captions
 
 
-# In[33]:
+# In[5]:
 
 
 first,second  = captions[0].split('\t')  # Splitting no of captions so that each line has only one caption.
@@ -75,13 +75,13 @@ print(first.split(".")[0])
 print(second)
 
 
-# In[25]:
+# In[6]:
 
 
 # Dictionary to Map each Image with the list of captions it has
 
 
-# In[34]:
+# In[7]:
 
 
 descriptions = {}
@@ -97,13 +97,13 @@ for x in captions:
     descriptions[img_name].append(second)
 
 
-# In[35]:
+# In[8]:
 
 
 descriptions["1000268201_693b08cb0e"]    # to get captions mapped with this particular image
 
 
-# In[40]:
+# In[9]:
 
 
 IMG_PATH = "Data/Images/"                # to see the image whether the captions generated above are relevant 
@@ -120,7 +120,7 @@ plt.show()
 # ### Data Cleaning
 # 
 
-# In[51]:
+# In[10]:
 
 
 def clean_text(sentence):
@@ -133,13 +133,13 @@ def clean_text(sentence):
     return sentence
 
 
-# In[52]:
+# In[11]:
 
 
 clean_text("A cat is sitting over the house # 64")     # removing words like 'a' 
 
 
-# In[53]:
+# In[12]:
 
 
 # Clean all Captions
@@ -148,13 +148,13 @@ for key,caption_list in descriptions.items():
         caption_list[i] = clean_text(caption_list[i])  # cleaning the ith caption
 
 
-# In[54]:
+# In[13]:
 
 
 descriptions["1000268201_693b08cb0e"]
 
 
-# In[56]:
+# In[14]:
 
 
 # Write the data to text file
@@ -164,7 +164,7 @@ with open("descriptions_1.txt","w") as f:
 
 # ### Vocabulary 
 
-# In[63]:
+# In[15]:
 
 
 descriptions = None
@@ -175,7 +175,7 @@ json_acceptable_string = descriptions.replace("'","\"")
 descriptions = json.loads(json_acceptable_string)
 
 
-# In[64]:
+# In[16]:
 
 
 print(type(descriptions))
@@ -193,7 +193,7 @@ for key in descriptions.keys():
 print("Vocab Size : %d"% len(vocab))
 
 
-# In[75]:
+# In[17]:
 
 
 # Total No of words across all the sentences
@@ -205,13 +205,13 @@ for key in descriptions.keys():
 print("Total Words %d"%len(total_words))
 
 
-# In[78]:
+# In[18]:
 
 
 # Filter Words from the Vocab according to certain threshold frequncy
 
 
-# In[80]:
+# In[19]:
 
 
 import collections               # shortlisting the unique words / removing duplicates 
@@ -221,7 +221,7 @@ freq_cnt = dict(counter)
 print(len(freq_cnt.keys())) 
 
 
-# In[86]:
+# In[20]:
 
 
 # Sort this dictionary according to the freq count
@@ -233,7 +233,7 @@ sorted_freq_cnt  = [x for x in sorted_freq_cnt if x[1]>threshold]   # removing w
 total_words = [x[0] for x in sorted_freq_cnt]
 
 
-# In[89]:
+# In[21]:
 
 
 print(len(total_words))           # final vocab 
@@ -241,27 +241,27 @@ print(len(total_words))           # final vocab
 
 # ### Prepare Train/Test Data
 
-# In[93]:
+# In[22]:
 
 
 train_file_data = readTextFile("Data/Flickr_TextData/Flickr_8k.trainImages.txt")
 test_file_data = readTextFile("Data/Flickr_TextData/Flickr_8k.testImages.txt")
 
 
-# In[99]:
+# In[23]:
 
 
 train = [row.split(".")[0] for row in train_file_data.split("\n")[:-1]]
 test = [row.split(".")[0] for row in test_file_data.split("\n")[:-1]]
 
 
-# In[103]:
+# In[25]:
 
 
 train[:5]
 
 
-# In[105]:
+# In[26]:
 
 
 # Prepare Description for the Training Data
@@ -275,7 +275,7 @@ for img_id in train:
         train_descriptions[img_id].append(cap_to_append)
 
 
-# In[106]:
+# In[27]:
 
 
 train_descriptions["1000268201_693b08cb0e"]
@@ -287,20 +287,20 @@ train_descriptions["1000268201_693b08cb0e"]
 
 # ### Step - 1 Image Feature Extraction
 
-# In[109]:
+# In[28]:
 
 
 model = ResNet50(weights="imagenet",input_shape=(224,224,3))
 model.summary()
 
 
-# In[112]:
+# In[29]:
 
 
 model_new = Model(model.input,model.layers[-2].output)
 
 
-# In[114]:
+# In[30]:
 
 
 def preprocess_img(img):
@@ -312,7 +312,7 @@ def preprocess_img(img):
     return img
 
 
-# In[125]:
+# In[31]:
 
 
 #img = preprocess_img(IMG_PATH+"1000268201_693b08cb0e.jpg")
@@ -321,7 +321,7 @@ def preprocess_img(img):
 #plt.show()
 
 
-# In[134]:
+# In[32]:
 
 
 def encode_image(img):
@@ -333,13 +333,13 @@ def encode_image(img):
     return feature_vector
 
 
-# In[135]:
+# In[33]:
 
 
 encode_image(IMG_PATH+"1000268201_693b08cb0e.jpg")
 
 
-# In[136]:
+# In[34]:
 
 
 start = time()
@@ -357,13 +357,13 @@ end_t = time()
 print("Total Time Taken :",end_t-start)
 
 
-# In[143]:
+# In[35]:
 
 
 get_ipython().system('mkdir saved')
 
 
-# In[145]:
+# In[36]:
 
 
 # Store everything to the disk 
@@ -371,7 +371,7 @@ with open("saved/encoded_train_features.pkl","wb") as f:
     pickle.dump(encoding_train,f)
 
 
-# In[138]:
+# In[37]:
 
 
 start = time()
@@ -389,7 +389,7 @@ end_t = time()
 print("Total Time Taken(test) :",end_t-start)
 
 
-# In[146]:
+# In[38]:
 
 
 with open("saved/encoded_test_features.pkl","wb") as f:
@@ -398,14 +398,14 @@ with open("saved/encoded_test_features.pkl","wb") as f:
 
 # ### Data pre-processing for Captions
 
-# In[149]:
+# In[39]:
 
 
 # Vocab
 len(total_words)
 
 
-# In[155]:
+# In[40]:
 
 
 word_to_idx = {}
@@ -416,7 +416,7 @@ for i,word in enumerate(total_words):
     idx_to_word[i+1] = word
 
 
-# In[159]:
+# In[41]:
 
 
 #word_to_idx["dog"]
@@ -424,7 +424,7 @@ for i,word in enumerate(total_words):
 print(len(idx_to_word))
 
 
-# In[162]:
+# In[42]:
 
 
 # Two special words
@@ -438,7 +438,7 @@ vocab_size = len(word_to_idx) + 1
 print("Vocab Size",vocab_size)
 
 
-# In[164]:
+# In[43]:
 
 
 max_len = 0 
@@ -451,7 +451,7 @@ print(max_len)
 
 # ### Data Loader (Generator)
 
-# In[165]:
+# In[44]:
 
 
 def data_generator(train_descriptions,encoding_train,word_to_idx,max_len,batch_size):
@@ -486,13 +486,13 @@ def data_generator(train_descriptions,encoding_train,word_to_idx,max_len,batch_s
 
 # ## Word Embeddings 
 
-# In[177]:
+# In[45]:
 
 
 f = open("./saved/glove.6B.50d.txt",encoding='utf8')
 
 
-# In[178]:
+# In[46]:
 
 
 embedding_index = {}
@@ -506,19 +506,19 @@ for line in f:
     
 
 
-# In[180]:
+# In[47]:
 
 
 f.close()
 
 
-# In[179]:
+# In[48]:
 
 
 embedding_index['apple']
 
 
-# In[187]:
+# In[49]:
 
 
 def get_embedding_matrix():
@@ -535,14 +535,14 @@ def get_embedding_matrix():
     
 
 
-# In[188]:
+# In[50]:
 
 
 embedding_matrix = get_embedding_matrix()
 embedding_matrix.shape
 
 
-# In[190]:
+# In[51]:
 
 
 #embedding_matrix[1847]
@@ -550,7 +550,7 @@ embedding_matrix.shape
 
 # #### Model Architecture
 
-# In[191]:
+# In[52]:
 
 
 input_img_features = Input(shape=(2048,))
@@ -558,7 +558,7 @@ inp_img1 = Dropout(0.3)(input_img_features)
 inp_img2 = Dense(256,activation='relu')(inp_img1)
 
 
-# In[192]:
+# In[53]:
 
 
 # Captions as Input
@@ -568,7 +568,7 @@ inp_cap2 = Dropout(0.3)(inp_cap1)
 inp_cap3 = LSTM(256)(inp_cap2)
 
 
-# In[193]:
+# In[54]:
 
 
 decoder1 = add([inp_img2,inp_cap3])
@@ -579,13 +579,13 @@ outputs = Dense(vocab_size,activation='softmax')(decoder2)
 model = Model(inputs=[input_img_features,input_captions],outputs=outputs)
 
 
-# In[194]:
+# In[55]:
 
 
 model.summary()
 
 
-# In[195]:
+# In[56]:
 
 
 # Important Thing - Embedding Layer
@@ -593,7 +593,7 @@ model.layers[2].set_weights([embedding_matrix])
 model.layers[2].trainable = False
 
 
-# In[196]:
+# In[57]:
 
 
 model.compile(loss='categorical_crossentropy',optimizer="adam")
@@ -601,7 +601,7 @@ model.compile(loss='categorical_crossentropy',optimizer="adam")
 
 # ### Training of Model
 
-# In[197]:
+# In[58]:
 
 
 epochs = 20
@@ -609,7 +609,7 @@ batch_size = 3
 steps = len(train_descriptions)//number_pics_per_batch
 
 
-# In[198]:
+# In[59]:
 
 
 def train():
@@ -620,7 +620,7 @@ def train():
         model.save('./model_weights/model_'+str(i)+'.h5')
 
 
-# In[199]:
+# In[60]:
 
 
 model = load_model('./model_weights/model_9.h5')
@@ -628,7 +628,7 @@ model = load_model('./model_weights/model_9.h5')
 
 # ## Predictions
 
-# In[222]:
+# In[61]:
 
 
 def predict_caption(photo):
@@ -651,7 +651,7 @@ def predict_caption(photo):
     return final_caption
 
 
-# In[230]:
+# In[62]:
 
 
 # Pick Some Random Images and See Results
@@ -671,5 +671,3 @@ for i in range(15):
     plt.imshow(i)
     plt.axis("off")
     plt.show()
-    
-
